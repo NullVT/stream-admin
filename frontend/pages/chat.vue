@@ -1,18 +1,43 @@
 <template>
-  <h1 class="text-white">Chat messages</h1>
-  <ul role="list" class="gap-y-2">
+  <ul
+    role="list"
+    class="gap-y-2 h-full overflow-y-auto overflow-x-hidden"
+    style="{ 'scrollbar-width': 'none' }"
+    ref="messageList"
+    @scroll="handleScroll"
+  >
     <li
       v-for="msg in messages"
       :key="msg.id"
-      class="flex justify-between gap-x-5 p-2 mb-0.5 bg-background border-l-4"
-      :class="`border-${userColorClass(msg) ?? 'base'}`"
+      class="flex justify-between snap-end gap-x-5 p-2 mb-0.5 bg-background border-l-4"
+      :class="{
+        'border-red-500': msg.sender.broadcaster,
+        'border-green-500': msg.sender.moderator,
+        'border-pink-500': msg.sender.twitch_vip,
+        'border-indigo-500': msg.sender.youtube_member,
+        'border-base':
+          !msg.sender.broadcaster &&
+          !msg.sender.moderator &&
+          !msg.sender.twitch_vip &&
+          !msg.sender.youtube_member,
+      }"
     >
       <div class="flex min-w-0 gap-x-4">
         <!-- <img class="h-12 w-12 flex-none rounded-full bg-gray-50" :src="person.imageUrl" alt="" /> -->
         <div class="min-w-0 flex-auto">
           <p
             class="mt-1 flex text-xs leading-5 font-bold"
-            :class="`text-${userColorClass(msg) ?? 'gray-500'}`"
+            :class="{
+              'text-red-500': msg.sender.broadcaster,
+              'text-green-500': msg.sender.moderator,
+              'text-pink-500': msg.sender.twitch_vip,
+              'text-indigo-500': msg.sender.youtube_member,
+              'text-sky-200':
+                !msg.sender.broadcaster &&
+                !msg.sender.moderator &&
+                !msg.sender.twitch_vip &&
+                !msg.sender.youtube_member,
+            }"
           >
             {{ msg.sender.name }}
           </p>
@@ -70,25 +95,52 @@
       </div>
     </li>
   </ul>
+
+  <!-- Scroll to Bottom Button -->
+  <button
+    v-if="!autoScrollEnabled"
+    @click="scrollToBottom"
+    class="fixed bottom-4 left-1/2 transform -translate-x-1/2 inline-flex items-center rounded p-2 bg-zinc-600 drop-shadow-md text-white font-semibold text-sm opacity-50 hover:opacity-100 uppercase"
+  >
+      <PauseIcon class="size-5 shrink-0" /> Scroll paused
+  </button>
 </template>
+
+<style scoped>
+/* For WebKit browsers (Chrome, Safari) */
+ul::-webkit-scrollbar {
+  width: 6px; /* Width of the scrollbar */
+}
+
+ul::-webkit-scrollbar-thumb {
+  background-color: rgba(80, 80, 80, 1); /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners on the scrollbar thumb */
+}
+
+ul::-webkit-scrollbar-track {
+  background: transparent; /* Background of the scrollbar track */
+}
+
+/* For Firefox */
+ul {
+  scrollbar-width: thin; /* Makes the scrollbar thin */
+  scrollbar-color: rgba(80, 80, 80, 1) transparent; /* Thumb and track color */
+}
+</style>
 
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
+import { PauseIcon } from "@heroicons/vue/16/solid";
 import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
-import { Ref, ref } from "vue";
+import { nextTick, onMounted, Ref, ref, watch } from "vue";
 import { urlToWss } from "../helpers";
 import { useSettingsStore } from "../stores/settings";
 import { AdminWSMessage } from "../types";
 
 const settingsStore = useSettingsStore();
 const messages: Ref<AdminWSMessage[]> = ref([]);
-
-const userColorClass = (msg: AdminWSMessage) => {
-  if (msg.sender.broadcaster) return "red-500";
-  if (msg.sender.moderator) return "green-500";
-  if (msg.sender.twitch_vip) return "pink-500";
-  if (msg.sender.youtube_member) return "indigo-500";
-};
+const autoScrollEnabled = ref(true); // Tracks if auto-scrolling is enabled
+const messageList = ref<HTMLElement | null>(null); // Ref for the <ul>
 
 const ws = new WebSocket(`${urlToWss(settingsStore.adminServerAddr)}/messages`);
 ws.addEventListener("message", async (event: WebSocketEventMap["message"]) => {
@@ -110,5 +162,41 @@ ws.addEventListener("open", async (event: WebSocketEventMap["open"]) => {
 });
 ws.addEventListener("close", async (event: WebSocketEventMap["error"]) => {
   console.log("close", event);
+});
+
+// Scroll to the bottom of the chat list (using the <ul> ref)
+const scrollToBottom = async () => {
+  await nextTick(); // Ensure the DOM is updated before scrolling
+  if (messageList.value) {
+    messageList.value.scrollTop = messageList.value.scrollHeight; // Scroll to the bottom
+    autoScrollEnabled.value = true;
+  }
+};
+
+// Handle the scroll event on the <ul> element
+const handleScroll = () => {
+  if (!messageList.value) return;
+
+  const threshold = 100; // Distance from the bottom to trigger auto-scroll disabling
+  const atBottom =
+    messageList.value.scrollHeight -
+      messageList.value.scrollTop -
+      messageList.value.clientHeight <
+    threshold;
+
+  autoScrollEnabled.value = atBottom; // Disable auto-scrolling if user scrolls up
+};
+
+onMounted(() => {
+  scrollToBottom(); // Ensure initial scroll to bottom
+
+  // Add any additional setup if needed
+});
+
+// Watch for new messages and scroll to the bottom if auto-scrolling is enabled
+watch(messages, () => {
+  if (autoScrollEnabled.value) {
+    scrollToBottom();
+  }
 });
 </script>
