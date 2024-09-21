@@ -67,7 +67,8 @@ func (h *Handler) TwitchCallback(ctx echo.Context) error {
 func (h *Handler) TwitchValidateAuth(ctx echo.Context) error {
 	token, err := secrets.Get("twitch_token")
 	if err != nil {
-		return echo.NewHTTPError(500, "Failed to get twitch token from keyring")
+		log.Error().Err(err).Msg("Failed to get twitch token from secrets")
+		return echo.NewHTTPError(500, "Failed to get twitch token from secrets")
 	}
 	if token == "" {
 		ctx.JSON(200, map[string]bool{"isValid": false})

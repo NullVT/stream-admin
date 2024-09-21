@@ -1,6 +1,8 @@
 package livechat
 
-import "time"
+import (
+	"time"
+)
 
 type Platform string
 

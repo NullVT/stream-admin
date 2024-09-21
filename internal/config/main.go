@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -31,9 +30,6 @@ var Cfg = &Config{}
 
 // Load handles loading the configuration from the appropriate file.
 func Load() error {
-	// Initialize zerolog with default settings
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
 	// Determine the appropriate OS-specific config directory
 	var configDir string
 	if runtime.GOOS == "windows" {

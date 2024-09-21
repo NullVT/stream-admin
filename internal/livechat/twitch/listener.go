@@ -17,7 +17,6 @@ type AuthConfig struct {
 }
 
 func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfig AuthConfig) <-chan livechat.Message {
-
 	go func() {
 		defer close(msgChan)
 		var sessionID string
@@ -25,8 +24,9 @@ func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfi
 
 		// connect to twitch
 		url := "wss://eventsub.wss.twitch.tv/ws"
-		conn, err := websocket.Dial(url, "", "")
+		conn, err := websocket.Dial(url, "", "http://localhost/")
 		if err != nil {
+			log.Error().Err(err).Msg("failed to dial Twitch WebSocket")
 			return
 		}
 		defer conn.Close()
@@ -42,6 +42,7 @@ func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfi
 					log.Error().Err(err).Msg("error receiving TwitchWS message")
 					return
 				}
+				log.Debug().Any("websocket msg", message).Msg("Twitch WS Message received")
 
 				// parse the message
 				parsedMsg, err := parseTwitchWebsocketMessage([]byte(message))
