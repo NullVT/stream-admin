@@ -22,9 +22,11 @@ export const useMessagesStore = defineStore("messages", {
   }),
 
   actions: {
-    push(msg: AdminWSMessage) {
+    push(message: AdminWSMessage) {
       // Create a new array with the new message added
-      const newMessages = [...this.messages, msg];
+      const newMessages = [...this.messages, message]
+        .sort((msg) => new Date(msg.published_at).valueOf())
+        .reverse();
 
       // Limit max number of messages
       this.messages = newMessages.slice(-config.maxMessages);
