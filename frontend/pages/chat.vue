@@ -108,22 +108,20 @@
 <style scoped>
 /* For WebKit browsers (Chrome, Safari) */
 ul::-webkit-scrollbar {
-  width: 6px; /* Width of the scrollbar */
+  width: 6px;
 }
-
 ul::-webkit-scrollbar-thumb {
-  background-color: rgba(80, 80, 80, 1); /* Color of the scrollbar thumb */
-  border-radius: 10px; /* Rounded corners on the scrollbar thumb */
+  background-color: rgba(80, 80, 80, 1);
+  border-radius: 10px;
 }
-
 ul::-webkit-scrollbar-track {
-  background: transparent; /* Background of the scrollbar track */
+  background: transparent;
 }
 
 /* For Firefox */
 ul {
-  scrollbar-width: thin; /* Makes the scrollbar thin */
-  scrollbar-color: rgba(80, 80, 80, 1) transparent; /* Thumb and track color */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(80, 80, 80, 1) transparent;
 }
 </style>
 
