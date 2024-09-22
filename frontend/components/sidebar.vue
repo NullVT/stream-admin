@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="fixed inset-y-0 left-16 hidden w-80 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 xl:block bg-background"
+    class="fixed inset-y-0 left-16 w-80 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8 xl:block bg-background"
   >
     <ul role="list" class="flex flex-1 flex-col gap-y-7">
       <li>

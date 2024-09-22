@@ -4,7 +4,7 @@ import {
   RssIcon,
 } from "@heroicons/vue/16/solid";
 import { createPinia } from "pinia";
-import piniaPersistedstate from "pinia-plugin-persistedstate";
+import piniaPersistedState from "pinia-plugin-persistedstate";
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import App from "./App.vue";
@@ -46,7 +46,7 @@ const router = createRouter({
 
 // set up store
 const pinia = createPinia();
-pinia.use(piniaPersistedstate);
+pinia.use(piniaPersistedState);
 
 // init app
 createApp(App).use(pinia).use(router).mount("#app");
