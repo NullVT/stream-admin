@@ -68,7 +68,7 @@ func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfi
 						Platform:    "twitch",
 						ID:          parsedMsg.Chat.Metadata.MessageID,
 						Body:        parsedMsg.Chat.Payload.Event.Message.Text,
-						ReceivedAt:  time.Now(),
+						ReceivedAt:  time.Now().UTC(),
 						PublishedAt: parsedMsg.Chat.Metadata.MessageTimestamp,
 						Sender: livechat.User{
 							ID:            parsedMsg.Chat.Payload.Event.ChatterUserID,

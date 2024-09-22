@@ -14,6 +14,6 @@ export type AdminWSMessage = {
   body: string;
   platform: Platform;
   sender: User;
-  received_at: Date;
-  published_at: Date;
+  received_at: string;
+  published_at: string;
 };

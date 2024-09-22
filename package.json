@@ -11,6 +11,8 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.22",
     "@heroicons/vue": "^2.1.5",
+    "@types/luxon": "^3.4.2",
+    "luxon": "^3.5.0",
     "pinia": "^2.2.2",
     "pinia-plugin-persistedstate": "^3.2.1",
     "vue": "^3.4.37",
