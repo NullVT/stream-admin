@@ -9,13 +9,6 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-type AuthConfig struct {
-	ClientID      string
-	AuthToken     string
-	UserID        string
-	BroadcasterID string
-}
-
 func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfig AuthConfig) <-chan livechat.Message {
 	go func() {
 		defer close(msgChan)

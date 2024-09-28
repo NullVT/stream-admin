@@ -1,5 +1,6 @@
 stream-admin.toml
 secrets.json
+emotecache
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,go,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,go,node

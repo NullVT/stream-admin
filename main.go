@@ -32,8 +32,15 @@ func main() {
 	// Open channel for sub process comms
 	msgChan := make(chan livechat.Message)
 
+	// load emotes
+	emc := &livechat.EmoteCache{}
+	emotesIndexFile := "./emotecache/index.json"
+	if err := emc.LoadFromFile(emotesIndexFile); err != nil {
+		log.Error().Err(err).Msg("failed to load emotes")
+	}
+
 	// Start API server
-	server, err := api.Start(msgChan)
+	server, err := api.Start(msgChan, emc)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start API server")
 		os.Exit(1)
@@ -53,6 +60,13 @@ func main() {
 		BroadcasterID: "1113117444",
 	}
 	twitch.StartListener(context.TODO(), msgChan, twitchAuth)
+
+	// sync emotes
+	// TODO: setup proper background task processing
+	if err := twitch.SyncEmotes(emc, twitchAuth, []string{"1113117444"}); err != nil {
+		log.Error().Err(err).Msg("Failed to sync Twitch Emotes")
+	}
+	emc.SaveToFile(emotesIndexFile)
 
 	// Graceful shutdown on SIGINT and SIGTERM
 	quit := make(chan os.Signal, 1)

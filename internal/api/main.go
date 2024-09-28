@@ -20,7 +20,7 @@ type Handler struct {
 	msgChan     chan livechat.Message
 	wsClients   map[*websocket.Conn]bool // Track active WebSocket clients
 	wsClientsMu sync.Mutex               // Ensure thread-safe access to clients
-
+	emotesCache *livechat.EmoteCache
 }
 
 var upgrader = websocket.Upgrader{
@@ -84,7 +84,25 @@ func (h *Handler) MessageWebsocket(ctx echo.Context) error {
 	return nil
 }
 
-func Start(msgChan chan livechat.Message) (*echo.Echo, error) {
+func (h *Handler) GetEmote(ctx echo.Context) error {
+	// lookup ID in cache index
+	emoteID := ctx.Param("id")
+	emote := h.emotesCache.FindByID(emoteID)
+	if emote == nil {
+		return echo.NewHTTPError(404)
+	}
+
+	// load file
+	if _, err := os.Stat(emote.FilePath); os.IsNotExist(err) {
+		log.Error().Err(err).Msg("emote file does not exist")
+		return echo.NewHTTPError(404, "file not found")
+	}
+
+	// read the file content
+	return ctx.File(emote.FilePath)
+}
+
+func Start(msgChan chan livechat.Message, emc *livechat.EmoteCache) (*echo.Echo, error) {
 	// Setup server
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -113,10 +131,12 @@ func Start(msgChan chan livechat.Message) (*echo.Echo, error) {
 	// API routes
 	apiGroup := e.Group("/api")
 	handler := &Handler{
-		msgChan:   msgChan,
-		wsClients: make(map[*websocket.Conn]bool),
+		msgChan:     msgChan,
+		wsClients:   make(map[*websocket.Conn]bool),
+		emotesCache: emc,
 	}
 	apiGroup.GET("/messages", handler.MessageWebsocket)
+	apiGroup.GET("/emotes/:id", handler.GetEmote)
 
 	// Twitch routes
 	apiGroup.GET("/auth/twitch", handler.TwitchLogin)

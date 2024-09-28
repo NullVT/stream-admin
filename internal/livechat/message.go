@@ -4,13 +4,6 @@ import (
 	"time"
 )
 
-type Platform string
-
-const (
-	Twitch  Platform = "twitch"
-	YouTube Platform = "youtube"
-)
-
 type User struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
