@@ -61,6 +61,7 @@ func (cer *ChannelEmotesResponse) GetEmotes() *[]Emote {
 			ID:        emoteData.ID,
 			Name:      emoteData.Name,
 			Images:    emoteData.Images,
+			Format:    emoteData.Format,
 			Scale:     emoteData.Scale,
 			ThemeMode: emoteData.ThemeMode,
 		})
@@ -185,6 +186,7 @@ func CacheEmotes(emoteCache *livechat.EmoteCache, emoteReq EmotesResponse) error
 	}
 
 	for _, emoteData := range *emoteReq.GetEmotes() {
+
 		// get image URL "https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/{{format}}/{{theme_mode}}/{{scale}}"
 		imgUrl := replaceMultiple(emoteReq.GetTemplate(), map[string]string{
 			"{{id}}":         emoteData.ID,

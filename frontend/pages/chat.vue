@@ -52,7 +52,28 @@
 
             <!-- body -->
             <p class="text-sm font-semibold leading-6 text-white">
-              {{ msg.body }}
+              <span
+                v-for="(item, index) in processedMessage(msg.body, msg.emotes)"
+                :key="index"
+              >
+                <!-- Render emote if it exists -->
+                <img
+                  v-if="item.isEmote"
+                  :src="item.emoteUrl"
+                  :alt="item.word"
+                  :title="item.word"
+                  class="inline h-6"
+                />
+                <!-- Render word if not an emote -->
+                <span v-else>{{ item.word }}</span>
+                <!-- Add space between words -->
+                <span
+                  v-if="
+                    index !== processedMessage(msg.body, msg.emotes).length - 1
+                  "
+                  >{{ " " }}
+                </span>
+              </span>
             </p>
           </div>
         </div>
@@ -134,15 +155,31 @@ import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
 import { DateTime } from "luxon";
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useMessagesStore } from "../stores/messages";
+import { useSettingsStore } from "../stores/settings";
+import { AdminWSMessage } from "../types";
+
+const settingsStore = useSettingsStore();
+const msgStore = useMessagesStore();
 
 const msgTime = (ts: string) => {
   return DateTime.fromISO(ts).toLocal().toFormat("HH:mm");
 };
 
+const processedMessage = (body: string, emotes: AdminWSMessage["emotes"]) => {
+  return body.split(" ").map((word) => {
+    const emote = emotes.find((em) => em.name === word);
+    const emoteUrl = !emote
+      ? undefined
+      : `${settingsStore.adminServerAddr}/emotes/${emote.id}`;
+    return emote
+      ? { isEmote: true, emote, emoteUrl, word }
+      : { isEmote: false, word };
+  });
+};
+
 /**
  * Scroll management
  */
-const msgStore = useMessagesStore();
 const autoScrollEnabled = ref(true);
 const messageList = ref<HTMLElement | null>(null); // Ref for the <ul>
 

@@ -2,6 +2,7 @@ package twitch
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/nullvt/stream-admin/internal/livechat"
@@ -9,7 +10,21 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfig AuthConfig) <-chan livechat.Message {
+func matchEmotes(emoteCache *livechat.EmoteCache, message string) []livechat.MessageEmote {
+	emotes := []livechat.MessageEmote{}
+	for _, word := range strings.Split(message, " ") {
+		emote := emoteCache.FindByName(word, livechat.Twitch)
+		if emote != nil {
+			emotes = append(emotes, livechat.MessageEmote{
+				Name: word,
+				ID:   emote.ID,
+			})
+		}
+	}
+	return emotes
+}
+
+func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfig AuthConfig, emotesCache *livechat.EmoteCache) <-chan livechat.Message {
 	go func() {
 		defer close(msgChan)
 		var sessionID string
@@ -61,6 +76,7 @@ func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfi
 						Platform:    "twitch",
 						ID:          parsedMsg.Chat.Metadata.MessageID,
 						Body:        parsedMsg.Chat.Payload.Event.Message.Text,
+						Emotes:      matchEmotes(emotesCache, parsedMsg.Chat.Payload.Event.Message.Text),
 						ReceivedAt:  time.Now().UTC(),
 						PublishedAt: parsedMsg.Chat.Metadata.MessageTimestamp,
 						Sender: livechat.User{

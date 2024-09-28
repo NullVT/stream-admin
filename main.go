@@ -59,11 +59,11 @@ func main() {
 		UserID:        "1113117444",
 		BroadcasterID: "1113117444",
 	}
-	twitch.StartListener(context.TODO(), msgChan, twitchAuth)
+	twitch.StartListener(context.TODO(), msgChan, twitchAuth, emc)
 
 	// sync emotes
 	// TODO: setup proper background task processing
-	if err := twitch.SyncEmotes(emc, twitchAuth, []string{"1113117444"}); err != nil {
+	if err := twitch.SyncEmotes(emc, twitchAuth, []string{"1113117444", "834053914"}); err != nil {
 		log.Error().Err(err).Msg("Failed to sync Twitch Emotes")
 	}
 	emc.SaveToFile(emotesIndexFile)

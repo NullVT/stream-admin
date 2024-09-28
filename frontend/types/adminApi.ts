@@ -12,6 +12,10 @@ type User = {
 export type AdminWSMessage = {
   id: string;
   body: string;
+  emotes: {
+    name: string;
+    id: string;
+  }[];
   platform: Platform;
   sender: User;
   received_at: string;
