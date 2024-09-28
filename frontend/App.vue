@@ -20,6 +20,7 @@ import Sidebar from "./components/sidebar.vue";
 import { urlToWss } from "./helpers";
 import { useMessagesStore } from "./stores/messages";
 import { useSettingsStore } from "./stores/settings";
+import { AdminWSMessage } from "./types";
 
 /**
  * Messages Websocket
@@ -40,7 +41,7 @@ const initWebSocket = () => {
   ws.addEventListener("message", async (event) => {
     console.debug("messages WS message", event);
     try {
-      const message = JSON.parse(event.data);
+      const message: AdminWSMessage = JSON.parse(event.data);
       msgStore.push(message);
     } catch (err) {
       console.error("failed to handle WS message", err);

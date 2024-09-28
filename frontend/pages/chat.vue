@@ -12,8 +12,8 @@
         class="flex justify-between snap-end gap-x-5 p-2 mb-0.5 bg-background border-l-4"
         :class="{
           'border-primary': msg.sender.broadcaster,
-          'border-green-500': msg.sender.moderator,
-          'border-pink-500': msg.sender.twitch_vip,
+          'border-green-600': msg.sender.moderator,
+          'border-pink-600': msg.sender.twitch_vip,
           'border-indigo-500': msg.sender.youtube_member,
           'border-base':
             !msg.sender.broadcaster &&
