@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,9 +16,11 @@ import (
 type EmotesResponse interface {
 	GetTemplate() string
 	GetEmotes() *[]Emote
+	GetSegment() string
 }
 
 type Emote struct {
+	Segment   string
 	ID        string
 	Name      string
 	Images    EmoteImages
@@ -35,6 +38,7 @@ type EmoteImages struct {
 type ChannelEmotesResponse struct {
 	Data     []ChannelEmoteData `json:"data"`
 	Template string             `json:"template"`
+	Segment  string             `json:"-"`
 }
 
 type ChannelEmoteData struct {
@@ -51,6 +55,10 @@ type ChannelEmoteData struct {
 
 func (cer *ChannelEmotesResponse) GetTemplate() string {
 	return cer.Template
+}
+
+func (cer *ChannelEmotesResponse) GetSegment() string {
+	return cer.Segment
 }
 
 func (cer *ChannelEmotesResponse) GetEmotes() *[]Emote {
@@ -86,6 +94,10 @@ type GlobalEmoteData struct {
 
 func (ger *GlobalEmotesResponse) GetTemplate() string {
 	return ger.Template
+}
+
+func (ger *GlobalEmotesResponse) GetSegment() string {
+	return "__global"
 }
 
 func (ger *GlobalEmotesResponse) GetEmotes() *[]Emote {
@@ -138,6 +150,7 @@ func ListChannelEmotes(auth AuthConfig, channelID string) (*ChannelEmotesRespons
 	if err := json.NewDecoder(res.Body).Decode(&resBody); err != nil {
 		return nil, err
 	}
+	resBody.Segment = channelID
 
 	return &resBody, nil
 }
@@ -185,8 +198,8 @@ func CacheEmotes(emoteCache *livechat.EmoteCache, emoteReq EmotesResponse) error
 		}
 	}
 
+	// add new emote
 	for _, emoteData := range *emoteReq.GetEmotes() {
-
 		// get image URL "https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/{{format}}/{{theme_mode}}/{{scale}}"
 		imgUrl := replaceMultiple(emoteReq.GetTemplate(), map[string]string{
 			"{{id}}":         emoteData.ID,
@@ -238,10 +251,35 @@ func CacheEmotes(emoteCache *livechat.EmoteCache, emoteReq EmotesResponse) error
 		}
 
 		// add emote to map
-		emoteCache.Update(livechat.Twitch, emoteData.Name, filename, contentType)
+		emoteCache.Update(livechat.Twitch, emoteReq.GetSegment(), emoteData.Name, filename, contentType)
 	}
 
-	// TODO: remove emotes not in list
+	// remove old emotes
+	for idx := 0; idx < len(*emoteCache); {
+		cachedEmote := (*emoteCache)[idx]
+		keep := true
+
+		// Check if the cached emote matches the platform and segment in emoteReq
+		if cachedEmote.Platform == livechat.Twitch && cachedEmote.Segment == emoteReq.GetSegment() {
+			for _, emote := range *emoteReq.GetEmotes() {
+				keep = false
+				if cachedEmote.Name == emote.Name {
+					keep = true
+					break
+				}
+			}
+		}
+
+		// delete the emote
+		if !keep {
+			if err := emoteCache.Delete(cachedEmote.ID); err != nil {
+				fmt.Printf("Error removing emote: %v\n", err)
+			}
+			continue
+		} else {
+			idx++
+		}
+	}
 
 	return nil
 }
@@ -265,6 +303,41 @@ func SyncEmotes(emoteCache *livechat.EmoteCache, auth AuthConfig, channelIDs []s
 		if err := CacheEmotes(emoteCache, channelEmotes); err != nil {
 			return err
 		}
+	}
+
+	log.Print(channelIDs)
+
+	// remove channels
+	for idx := 0; idx < len(*emoteCache); {
+		cachedEmote := (*emoteCache)[idx]
+
+		// Only operate on Twitch platform emotes
+		if cachedEmote.Platform == livechat.Twitch {
+			keep := false
+
+			// Check if the emote belongs to the global segment
+			if cachedEmote.Segment == globalEmotes.GetSegment() {
+				keep = true
+			}
+
+			// If not global, check if the segment matches any channelID
+			for _, channelID := range channelIDs {
+				if cachedEmote.Segment == channelID {
+					keep = true
+					break
+				}
+			}
+
+			// If the emote should not be kept then delete it
+			if !keep {
+				if err := emoteCache.Delete(cachedEmote.ID); err != nil {
+					return err
+				}
+				continue
+			}
+		}
+
+		idx++
 	}
 
 	return nil

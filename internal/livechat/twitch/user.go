@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 )
 
 type User struct {
@@ -18,14 +19,29 @@ type UsersResponse struct {
 	Data []User `json:"data"`
 }
 
-func GetCurrentUser(clientId string, token string) (*User, error) {
+func GetUsers(auth AuthConfig, userNames []string) ([]User, error) {
+	// set userName
+	queryParams := url.Values{}
+	if len(userNames) >= 1 {
+		for _, userName := range userNames {
+			queryParams.Add("login", userName)
+		}
+	}
+
+	baseURL := url.URL{
+		Scheme:   "https",
+		Host:     "api.twitch.tv",
+		Path:     "/helix/users",
+		RawQuery: queryParams.Encode(),
+	}
+
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://api.twitch.tv/helix/users", nil)
+	req, err := http.NewRequest("GET", baseURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Client-Id", clientId)
+	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Client-Id", auth.ClientID)
 
 	// send request
 	res, err := client.Do(req)
@@ -51,7 +67,7 @@ func GetCurrentUser(clientId string, token string) (*User, error) {
 		return nil, errors.New("no user data found")
 	}
 
-	return &usersResponse.Data[0], nil
+	return usersResponse.Data, nil
 }
 
 func (usr *User) MarshalString() (string, error) {

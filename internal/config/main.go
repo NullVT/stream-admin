@@ -12,8 +12,9 @@ import (
 
 // Config holds the application configuration.
 type Config struct {
-	Twitch TwitchConfig `mapstructure:"twitch"`
-	Server ServerConfig `mapstructure:"server"`
+	Twitch          TwitchConfig      `mapstructure:"twitch"`
+	Server          ServerConfig      `mapstructure:"server"`
+	EmotesWhitelist map[string]string `mapstructure:"emotesWhitelist"`
 }
 type TwitchConfig struct {
 	ClientID string `mapstructure:"clientId"`
@@ -44,6 +45,8 @@ func Load() error {
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")       // Check the working directory first
 	viper.AddConfigPath(configDir) // Check the OS-specific directory
+
+	setDefaults()
 
 	// Attempt to read the config file
 	if err := viper.ReadInConfig(); err != nil {

@@ -9,9 +9,9 @@ import (
 
 	"github.com/nullvt/stream-admin/internal/api"
 	"github.com/nullvt/stream-admin/internal/config"
+	"github.com/nullvt/stream-admin/internal/helpers"
 	"github.com/nullvt/stream-admin/internal/livechat"
 	"github.com/nullvt/stream-admin/internal/livechat/twitch"
-	"github.com/nullvt/stream-admin/internal/secrets"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -47,23 +47,16 @@ func main() {
 	}
 
 	// Start chat listeners
-	twitchToken, err := secrets.Get("twitch_token")
+	twitchAuth, err := helpers.GetTwitchAuth()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to load twitch_token")
 		os.Exit(1)
-	}
-	twitchAuth := twitch.AuthConfig{
-		ClientID:  config.Cfg.Twitch.ClientID,
-		AuthToken: twitchToken,
-		// TODO: replace with user from secrets
-		UserID:        "1113117444",
-		BroadcasterID: "1113117444",
 	}
 	twitch.StartListener(context.TODO(), msgChan, twitchAuth, emc)
 
 	// sync emotes
 	// TODO: setup proper background task processing
-	if err := twitch.SyncEmotes(emc, twitchAuth, []string{"1113117444", "834053914"}); err != nil {
+	emotesChannels := helpers.MapKeys(config.Cfg.EmotesWhitelist)
+	if err := twitch.SyncEmotes(emc, twitchAuth, emotesChannels); err != nil {
 		log.Error().Err(err).Msg("Failed to sync Twitch Emotes")
 	}
 	emc.SaveToFile(emotesIndexFile)

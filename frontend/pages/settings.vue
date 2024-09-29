@@ -8,6 +8,12 @@
         </label>
         <AuthTwitch />
       </div>
+      <div class="mt-4">
+        <label class="block text-sm font-medium leading-6 ml-2 text-white">
+          Emote Channels
+        </label>
+        <EmoteWhitelist />
+      </div>
     </Card>
 
     <Card title="Chatbot API">
@@ -27,6 +33,7 @@ import Card from "../components/card.vue";
 import AdminServerAddr from "../components/settings/adminServerAddr.vue";
 import AuthTwitch from "../components/settings/authTwitch.vue";
 import ChatbotAddr from "../components/settings/chatbotAddr.vue";
+import EmoteWhitelist from "../components/settings/emoteWhitelist.vue";
 import { useSettingsStore } from "../stores/settings";
 
 const settingsStore = useSettingsStore();

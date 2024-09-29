@@ -13,6 +13,7 @@ type Emote struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
 	Platform Platform `json:"platform"`
+	Segment  string   `json:"segment"`
 	MimeType string   `json:"mimetype"`
 	FilePath string   `json:"filepath"`
 }
@@ -42,7 +43,7 @@ func (ec *EmoteCache) FindByID(id string) *Emote {
 	return nil
 }
 
-func (ec *EmoteCache) Update(platform Platform, name string, filepath string, mimetype string) {
+func (ec *EmoteCache) Update(platform Platform, segment string, name string, filepath string, mimetype string) {
 	for i := range *ec {
 		emote := &(*ec)[i]
 		if emote.Platform == platform && emote.Name == name {
@@ -56,10 +57,31 @@ func (ec *EmoteCache) Update(platform Platform, name string, filepath string, mi
 		ID:       uuid.New().String(),
 		Name:     name,
 		Platform: platform,
+		Segment:  segment,
 		FilePath: filepath,
 		MimeType: mimetype,
 	}
 	*ec = append(*ec, newEmote)
+}
+
+func (ec *EmoteCache) Delete(id string) error {
+	for idx, emote := range *ec {
+		if emote.ID == id {
+			// Remove the file associated with the emote
+			if err := os.Remove(emote.FilePath); err != nil {
+				return err // Return error if the file couldn't be deleted
+			}
+
+			// Remove the emote from the cache
+			*ec = append((*ec)[:idx], (*ec)[idx+1:]...)
+
+			// Return after the emote is found and removed
+			return nil
+		}
+	}
+
+	// If the emote ID was not found, return an error
+	return fmt.Errorf("emote with ID %s not found", id)
 }
 
 func (ec *EmoteCache) SaveToFile(fileName string) error {

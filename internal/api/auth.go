@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/nullvt/stream-admin/internal/config"
+	"github.com/nullvt/stream-admin/internal/helpers"
 	"github.com/nullvt/stream-admin/internal/livechat/twitch"
 	"github.com/nullvt/stream-admin/internal/secrets"
 	"github.com/rs/zerolog/log"
@@ -44,14 +45,18 @@ func (h *Handler) TwitchCallback(ctx echo.Context) error {
 	}
 
 	// get extended user info
-	userInfo, err := twitch.GetCurrentUser(config.Cfg.Twitch.ClientID, authToken)
+	twitchAuth, err := helpers.GetTwitchAuth()
+	if err != nil {
+		return echo.NewHTTPError(500, "failed to load twitch auth")
+	}
+	userInfo, err := twitch.GetUsers(twitchAuth, []string{})
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get UserInfo for authToken")
 		return echo.NewHTTPError(500, "Failed to get UserInfo")
 	}
 
 	// persist user info
-	userJson, err := userInfo.MarshalString()
+	userJson, err := userInfo[0].MarshalString()
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to marshal UserInfo to string")
 		return echo.NewHTTPError(500, "Failed to persist UserInfo")
