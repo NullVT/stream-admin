@@ -74,7 +74,7 @@ func StartListener(ctx context.Context, msgChan chan livechat.Message, authConfi
 				if parsedMsg.Chat != nil {
 					msgChan <- livechat.Message{
 						Platform:    "twitch",
-						ID:          parsedMsg.Chat.Metadata.MessageID,
+						ID:          parsedMsg.Chat.Payload.Event.MessageID,
 						Body:        parsedMsg.Chat.Payload.Event.Message.Text,
 						Emotes:      matchEmotes(emotesCache, parsedMsg.Chat.Payload.Event.Message.Text),
 						ReceivedAt:  time.Now().UTC(),

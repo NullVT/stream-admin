@@ -3,6 +3,8 @@ package twitch
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -134,4 +136,38 @@ func parseTwitchWebsocketMessage(rawJSON []byte) (*TwitchWebsocketMessage, error
 	}
 
 	return msg, nil
+}
+
+func DeleteMessage(auth AuthConfig, messageID string) error {
+	// set URL and query
+	reqURL, _ := url.Parse("https://api.twitch.tv/helix/moderation/chat")
+	reqQuery := reqURL.Query()
+	reqQuery.Add("broadcaster_id", auth.BroadcasterID)
+	reqQuery.Add("moderator_id", auth.UserID)
+	reqQuery.Add("message_id", messageID)
+	reqURL.RawQuery = reqQuery.Encode()
+
+	// create http req
+	req, err := http.NewRequest("DELETE", reqURL.String(), nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Client-Id", auth.ClientID)
+	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	// send req
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	// check response code
+	if res.StatusCode != 204 {
+		return fmt.Errorf("failed to delete Twitch chat message (%d)", res.StatusCode)
+	}
+
+	return nil
 }

@@ -1,7 +1,7 @@
 import {
   ChatBubbleBottomCenterIcon,
   Cog6ToothIcon,
-  RssIcon,
+  IdentificationIcon,
 } from "@heroicons/vue/16/solid";
 import { createPinia } from "pinia";
 import piniaPersistedState from "pinia-plugin-persistedstate";
@@ -10,6 +10,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import App from "./App.vue";
 import ChatPage from "./pages/chat.vue";
 import SettingsPage from "./pages/settings.vue";
+import StreamInfoPage from "./pages/streamInfo.vue";
 import "./style.css";
 
 const routes = [
@@ -19,11 +20,17 @@ const routes = [
     component: ChatPage,
     meta: { title: "Chat", icon: ChatBubbleBottomCenterIcon },
   },
+  // {
+  //   path: "/feed",
+  //   name: "feed",
+  //   component: ChatPage,
+  //   meta: { title: "Activity Feed", icon: RssIcon },
+  // },
   {
-    path: "/feed",
-    name: "feed",
-    component: ChatPage,
-    meta: { title: "Activity Feed", icon: RssIcon },
+    path: "/stream-info",
+    name: "stream-info",
+    component: StreamInfoPage,
+    meta: { title: "Stream info", icon: IdentificationIcon },
   },
   {
     path: "/settings",
@@ -31,6 +38,8 @@ const routes = [
     component: SettingsPage,
     meta: { title: "Settings", icon: Cog6ToothIcon, pinToBottom: true },
   },
+
+  // internal routes
   {
     path: "/oauth/twitch",
     name: "oauth",
