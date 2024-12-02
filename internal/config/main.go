@@ -12,20 +12,20 @@ import (
 
 // Config holds the application configuration.
 type Config struct {
-	Twitch            TwitchConfig       `mapstructure:"twitch"`
-	Server            ServerConfig       `mapstructure:"server"`
-	EmotesWhitelist   map[string]string  `mapstructure:"emotesWhitelist"`
-	StreamInfoPresets []StreamInfoPreset `mapstructure:"streamInfoPresets"`
+	Twitch            TwitchConfig       `json:"twitch"`
+	Server            ServerConfig       `json:"server"`
+	EmotesWhitelist   map[string]string  `json:"emotesWhitelist"`
+	StreamInfoPresets []StreamInfoPreset `json:"streamInfoPresets"`
 }
 
 type TwitchConfig struct {
-	ClientID string `mapstructure:"clientId"`
+	ClientID string `json:"clientId"`
 }
 
 type ServerConfig struct {
 	Host    string
 	Port    uint16
-	BaseURL string `mapstructure:"baseUrl"`
+	BaseURL string `json:"baseUrl"`
 	Keyring bool
 }
 
