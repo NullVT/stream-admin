@@ -64,11 +64,11 @@ func (h *Handler) TwitchLinkFiltering(ctx echo.Context) error {
 		return echo.NewHTTPError(500, "Failed to load UserInfo")
 	}
 
-	// get twitch secret
-	authToken, err := secrets.Get("twitch_token")
-	if err != nil || authToken == "" {
-		log.Error().Err(err).Msg("failed to get twitch token from keyring")
-		return echo.NewHTTPError(500, "Failed to load Twitch auth token")
+	// get twitch auth
+	twitchAuth, err := helpers.GetTwitchAuth()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get Twitch auth")
+		return echo.NewHTTPError(500)
 	}
 
 	// create GQL query
@@ -101,7 +101,7 @@ func (h *Handler) TwitchLinkFiltering(ctx echo.Context) error {
 		log.Error().Err(err).Msg("failed to init request")
 		return echo.NewHTTPError(500, "Failed to create request")
 	}
-	req.Header.Set("Authorization", "Bearer "+authToken)
+	req.Header.Set("Authorization", twitchAuth.Bearer())
 	req.Header.Set("Client-ID", config.Cfg.Twitch.ClientID)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -161,7 +161,7 @@ func (h *Handler) TwitchCategorySearch(ctx echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	req.Header.Set("Client-Id", twitchAuth.ClientID)
-	req.Header.Set("Authorization", "Bearer "+twitchAuth.AuthToken)
+	req.Header.Set("Authorization", twitchAuth.Bearer())
 	req.Header.Set("Content-Type", "application/json")
 
 	// send req
@@ -216,7 +216,7 @@ func (h *Handler) TwitchGetStreamInfo(ctx echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	req.Header.Set("Client-Id", twitchAuth.ClientID)
-	req.Header.Set("Authorization", "Bearer "+twitchAuth.AuthToken)
+	req.Header.Set("Authorization", twitchAuth.Bearer())
 	req.Header.Set("Content-Type", "application/json")
 
 	// send req

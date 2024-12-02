@@ -40,7 +40,7 @@ func GetUsers(auth AuthConfig, userNames []string) ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Authorization", auth.Bearer())
 	req.Header.Set("Client-Id", auth.ClientID)
 
 	// send request

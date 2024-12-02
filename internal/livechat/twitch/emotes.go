@@ -129,7 +129,7 @@ func ListChannelEmotes(auth AuthConfig, channelID string) (*ChannelEmotesRespons
 		return nil, err
 	}
 	req.Header.Set("Client-Id", auth.ClientID)
-	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Authorization", auth.Bearer())
 	req.Header.Set("Content-Type", "application/json")
 
 	// send req
@@ -162,7 +162,7 @@ func ListGlobalEmotes(auth AuthConfig) (*GlobalEmotesResponse, error) {
 		return nil, err
 	}
 	req.Header.Set("Client-Id", auth.ClientID)
-	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Authorization", auth.Bearer())
 	req.Header.Set("Content-Type", "application/json")
 
 	// send req

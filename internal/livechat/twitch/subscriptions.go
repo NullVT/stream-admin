@@ -70,7 +70,7 @@ func Subscribe(authConfig AuthConfig, sessionID string, subType string) (string,
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer "+authConfig.AuthToken)
+	req.Header.Set("Authorization", authConfig.Bearer())
 	req.Header.Set("Client-Id", authConfig.ClientID)
 	req.Header.Set("Content-Type", "application/json")
 

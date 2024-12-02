@@ -153,7 +153,7 @@ func DeleteMessage(auth AuthConfig, messageID string) error {
 		return err
 	}
 	req.Header.Set("Client-Id", auth.ClientID)
-	req.Header.Set("Authorization", "Bearer "+auth.AuthToken)
+	req.Header.Set("Authorization", auth.Bearer())
 	req.Header.Set("Content-Type", "application/json")
 
 	// send req
