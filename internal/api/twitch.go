@@ -18,13 +18,13 @@ const (
 	twitchGqlUrl = "https://gql.twitch.tv/gql"
 )
 
-type UpdateChatSettingsRequest struct {
+type TwitchUpdateChatSettingsRequest struct {
 	OperationName string                 `json:"operationName"`
 	Variables     map[string]interface{} `json:"variables"`
 	Extensions    map[string]interface{} `json:"extensions"`
 }
 
-type UpdateChatSettingsResponse struct {
+type TwitchUpdateChatSettingsResponse struct {
 	Data struct {
 		UpdateChatSettings struct {
 			ChatSettings struct {
@@ -34,19 +34,19 @@ type UpdateChatSettingsResponse struct {
 	} `json:"data"`
 }
 
-type ModifyChannelInformationRequest struct {
+type TwitchModifyChannelInformationRequest struct {
 	GameID string   `json:"game_id"`
 	Title  string   `json:"title"`
 	Tags   []string `json:"tags"`
 }
 
-type TwitchLinkFilteringRequest struct {
+type LinkFilteringRequest struct {
 	Enabled bool `json:"enabled"`
 }
 
 func (h *Handler) TwitchLinkFiltering(ctx echo.Context) error {
 	// unmarshal request
-	body := new(TwitchLinkFilteringRequest)
+	body := new(LinkFilteringRequest)
 	if err := ctx.Bind(body); err != nil {
 		log.Error().Err(err).Msg("failed to unmarshal request body")
 		return echo.NewHTTPError(500, err.Error())
@@ -72,7 +72,7 @@ func (h *Handler) TwitchLinkFiltering(ctx echo.Context) error {
 	}
 
 	// create GQL query
-	requestBody := []UpdateChatSettingsRequest{
+	requestBody := []TwitchUpdateChatSettingsRequest{
 		{
 			OperationName: "UpdateChatSettings",
 			Variables: map[string]interface{}{
@@ -114,7 +114,7 @@ func (h *Handler) TwitchLinkFiltering(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	var response UpdateChatSettingsResponse
+	var response TwitchUpdateChatSettingsResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		log.Error().Err(err).Msg("failed to unmarshal GQL response")
 		return echo.NewHTTPError(500, "Twitch GQL request failed")

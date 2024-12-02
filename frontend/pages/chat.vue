@@ -96,18 +96,74 @@
               leave-to-class="transform opacity-0 scale-95"
             >
               <MenuItems
-                class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none"
+                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-background py-2 shadow-lg ring-1 ring-slate-900/90 focus:outline-none"
               >
                 <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
+                  <button
+                    :disabled="actionLoading"
+                    @click="deleteMessage(msg.id)"
                     :class="[
-                      active ? 'bg-gray-50' : '',
-                      'block px-3 py-1 text-sm leading-6 text-gray-900',
+                      active ? 'bg-primary' : '',
+                      'group flex items-center px-4 py-2 text-sm text-white w-full',
                     ]"
                   >
-                    View profile
-                    <span class="sr-only">, {{ msg.sender.name }} </span>
+                    <TrashIcon class="mr-3 h-5 w-5 text-gray-400" />
+                    Delete message
+                  </button>
+                </MenuItem>
+                <MenuItem v-slot="{ active }">
+                  <button
+                    :disabled="actionLoading"
+                    :class="[
+                      active ? 'bg-primary' : '',
+                      'group flex items-center px-4 py-2 text-sm text-white w-full',
+                    ]"
+                    @click="banUser(msg.platform, msg.sender.id, 'spam')"
+                  >
+                    <NoSymbolIcon class="mr-3 h-5 w-5 text-gray-400" />
+                    Ban (spam)
+                  </button>
+                </MenuItem>
+                <MenuItem v-slot="{ active }">
+                  <a
+                    :disabled="actionLoading"
+                    href="#"
+                    :class="[
+                      active ? 'bg-primary' : '',
+                      'group flex items-center px-4 py-2 text-sm text-white',
+                    ]"
+                    @click="timeoutUser(msg.platform, msg.sender.id, 10)"
+                  >
+                    <ClockIcon class="mr-3 h-5 w-5 text-gray-400" />
+                    Timeout 10s
+                  </a>
+                </MenuItem>
+                <MenuItem v-slot="{ active }">
+                  <a
+                    :disabled="actionLoading"
+                    href="#"
+                    :class="[
+                      active ? 'bg-primary' : '',
+                      'group flex items-center px-4 py-2 text-sm text-white',
+                    ]"
+                    @click="timeoutUser(msg.platform, msg.sender.id, 60)"
+                  >
+                    <ClockIcon class="mr-3 h-5 w-5 text-gray-400" />
+                    Timeout 60s
+                  </a>
+                </MenuItem>
+                <MenuItem v-slot="{ active }">
+                  <a
+                    :disabled="actionLoading"
+                    href="#"
+                    :class="[
+                      active ? 'bg-primary' : '',
+                      'group flex items-center px-4 py-2 text-sm text-white',
+                    ]"
+                    @click="timeoutUser(msg.platform, msg.sender.id, 600)"
+                  >
+                    <ClockIcon class="mr-3 h-5 w-5 text-gray-400" />
+                    Timeout 10m
                   </a>
                 </MenuItem>
               </MenuItems>
@@ -150,8 +206,12 @@ ul {
 
 <script lang="ts" setup>
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
-import { PauseIcon } from "@heroicons/vue/16/solid";
-import { EllipsisVerticalIcon } from "@heroicons/vue/20/solid";
+import { PauseIcon, TrashIcon } from "@heroicons/vue/16/solid";
+import {
+  ClockIcon,
+  EllipsisVerticalIcon,
+  NoSymbolIcon,
+} from "@heroicons/vue/20/solid";
 import { DateTime } from "luxon";
 import { nextTick, onMounted, ref, watch } from "vue";
 import { useMessagesStore } from "../stores/messages";
@@ -161,6 +221,9 @@ import { AdminWSMessage } from "../types";
 const settingsStore = useSettingsStore();
 const msgStore = useMessagesStore();
 
+/**
+ * display messages
+ */
 const msgTime = (ts: string) => {
   return DateTime.fromISO(ts).toLocal().toFormat("HH:mm");
 };
@@ -175,6 +238,90 @@ const processedMessage = (body: string, emotes: AdminWSMessage["emotes"]) => {
       ? { isEmote: true, emote, emoteUrl, word }
       : { isEmote: false, word };
   });
+};
+
+/**
+ * actions
+ */
+const actionLoading = ref(false);
+const deleteMessage = async (id: AdminWSMessage["id"]) => {
+  actionLoading.value = true;
+  try {
+    const res = await fetch(`${settingsStore.adminServerAddr}/messages/${id}`, {
+      method: "DELETE",
+    });
+    if (res.status !== 204) {
+      throw new Error(`Unexpected response code (${res.status})`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("failed to delete message");
+  }
+  actionLoading.value = false;
+};
+
+const banUser = async (
+  platform: AdminWSMessage["platform"],
+  id: AdminWSMessage["sender"]["id"],
+  message?: string
+) => {
+  actionLoading.value = true;
+  try {
+    const res = await fetch(
+      `${settingsStore.adminServerAddr}/${platform}/ban-user`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: id,
+          permanent: true,
+          ...(message && { reason: message }),
+        }),
+      }
+    );
+    if (res.status !== 204) {
+      throw new Error(`Unexpected response code (${res.status})`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("failed to ban user");
+  }
+  actionLoading.value = false;
+};
+
+const timeoutUser = async (
+  platform: AdminWSMessage["platform"],
+  id: AdminWSMessage["sender"]["id"],
+  duration: number,
+  message?: string
+) => {
+  actionLoading.value = true;
+  try {
+    const res = await fetch(
+      `${settingsStore.adminServerAddr}/${platform}/ban-user`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: id,
+          permanent: false,
+          duration: duration,
+          ...(message && { reason: message }),
+        }),
+      }
+    );
+    if (res.status !== 204) {
+      throw new Error(`Unexpected response code (${res.status})`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("failed to ban user");
+  }
+  actionLoading.value = false;
 };
 
 /**

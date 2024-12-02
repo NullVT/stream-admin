@@ -166,7 +166,7 @@ func (h *Handler) StreamInfoPresetApply(ctx echo.Context) error {
 	reqQuery := reqURL.Query()
 	reqQuery.Add("broadcaster_id", twitchAuth.UserID)
 	reqURL.RawQuery = reqQuery.Encode()
-	requestBody := ModifyChannelInformationRequest{
+	requestBody := TwitchModifyChannelInformationRequest{
 		GameID: preset.Category.ID,
 		Title:  preset.Title,
 		Tags:   preset.Tags,

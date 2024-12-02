@@ -75,6 +75,7 @@ func Start(msgChan chan livechat.Message, emc *livechat.EmoteCache) (*echo.Echo,
 	apiGroup.GET("/auth/twitch/valid", handler.TwitchValidateAuth)
 	apiGroup.POST("/twitch/link-filtering", handler.TwitchLinkFiltering)
 	apiGroup.GET("/twitch/categories", handler.TwitchCategorySearch)
+	apiGroup.POST("/twitch/ban-user", handler.TwitchBanUser)
 
 	// Start server in a goroutine
 	go func() {

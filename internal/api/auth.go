@@ -13,7 +13,13 @@ import (
 )
 
 func (h *Handler) TwitchLogin(ctx echo.Context) error {
-	scopes := []string{"user:bot", "user:read:chat", "moderator:manage:chat_messages", "channel:manage:broadcast"}
+	scopes := []string{
+		"user:bot",
+		"user:read:chat",
+		"moderator:manage:chat_messages",
+		"channel:manage:broadcast",
+		"moderator:manage:banned_users",
+	}
 
 	redirectURL := config.Cfg.Server.BaseURL + "/oauth/twitch"
 	url, err := twitch.OAuthLogin(config.Cfg.Twitch.ClientID, redirectURL, scopes)
