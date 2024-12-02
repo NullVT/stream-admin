@@ -1,15 +1,20 @@
 <template>
   <div class="h-full flex flex-col">
     <Card title="Admin API" class="mb-4">
-      <AdminServerAddr />
       <div class="mt-4">
-        <label class="block text-sm font-medium leading-6 ml-2 text-white">
+        <label class="block text-md font-medium leading-6 ml-2 text-white">
+          Server Address
+        </label>
+        <AdminServerAddr />
+      </div>
+      <div class="mt-4">
+        <label class="block text-md font-medium leading-6 ml-2 text-white">
           Connected Accounts
         </label>
         <AuthTwitch />
       </div>
       <div class="mt-4">
-        <label class="block text-sm font-medium leading-6 ml-2 text-white">
+        <label class="block text-md font-medium leading-6 ml-2 text-white">
           Emote Channels
         </label>
         <EmoteWhitelist />

@@ -3,7 +3,7 @@
     <div class="flex justify-between">
       <label
         for="chatbot-addr"
-        class="block text-sm font-medium leading-6 ml-2 text-white"
+        class="block text-md font-medium leading-6 ml-2 text-white"
       >
         Server Address
       </label>

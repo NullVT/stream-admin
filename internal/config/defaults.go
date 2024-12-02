@@ -12,7 +12,8 @@ func setDefaults() {
 			Port:    8080,
 			BaseURL: "http://localhost:8080/",
 		},
-		EmotesWhitelist: map[string]string{},
+		EmotesWhitelist:   map[string]string{},
+		StreamInfoPresets: []StreamInfoPreset{},
 	}
 
 	viper.SetDefault("twitch.clientId", defaultConfig.Twitch.ClientID)
@@ -20,4 +21,5 @@ func setDefaults() {
 	viper.SetDefault("server.port", defaultConfig.Server.Port)
 	viper.SetDefault("server.baseUrl", defaultConfig.Server.BaseURL)
 	viper.SetDefault("emotesWhitelist", defaultConfig.EmotesWhitelist)
+	viper.SetDefault("streamInfoPresets", defaultConfig.StreamInfoPresets)
 }

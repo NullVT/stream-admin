@@ -16,6 +16,10 @@ type AuthConfig struct {
 	BroadcasterID string
 }
 
+func (ac *AuthConfig) Bearer() string {
+	return "Bearer " + ac.AuthToken
+}
+
 // generate a login URL to request an Oauth token
 func OAuthLogin(clientId string, redirectURI string, scopes []string) (string, error) {
 	if clientId == "" {

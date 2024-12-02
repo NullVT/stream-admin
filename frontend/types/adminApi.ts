@@ -21,3 +21,17 @@ export type AdminWSMessage = {
   received_at: string;
   published_at: string;
 };
+
+export type Category = {
+  id: string;
+  name: string;
+  image_url: string;
+};
+
+export type StreamInfoPreset = {
+  id: string;
+  name: string;
+  title: string;
+  category: Category;
+  tags: string[];
+};

@@ -12,18 +12,33 @@ import (
 
 // Config holds the application configuration.
 type Config struct {
-	Twitch          TwitchConfig      `mapstructure:"twitch"`
-	Server          ServerConfig      `mapstructure:"server"`
-	EmotesWhitelist map[string]string `mapstructure:"emotesWhitelist"`
+	Twitch            TwitchConfig       `mapstructure:"twitch"`
+	Server            ServerConfig       `mapstructure:"server"`
+	EmotesWhitelist   map[string]string  `mapstructure:"emotesWhitelist"`
+	StreamInfoPresets []StreamInfoPreset `mapstructure:"streamInfoPresets"`
 }
+
 type TwitchConfig struct {
 	ClientID string `mapstructure:"clientId"`
 }
+
 type ServerConfig struct {
 	Host    string
 	Port    uint16
 	BaseURL string `mapstructure:"baseUrl"`
 	Keyring bool
+}
+
+type StreamInfoPreset struct {
+	ID       string   `json:"id"`
+	Name     string   `json:"name"`
+	Title    string   `json:"title"`
+	Tags     []string `json:"tags"`
+	Category struct {
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		ImageURL string `json:"image_url"`
+	} `json:"category"`
 }
 
 // Global variable to hold the loaded config.
@@ -38,11 +53,11 @@ func Load() error {
 	} else {
 		configDir = "/etc/nullvt"
 	}
-	configFileName := "stream-admin.toml"
+	configFileName := "stream-admin.json"
 
 	// Add the working directory and the OS-specific config directory to the search paths
 	viper.SetConfigName("stream-admin") // This will be used for both working directory and OS-specific directory files
-	viper.SetConfigType("toml")
+	viper.SetConfigType("json")
 	viper.AddConfigPath(".")       // Check the working directory first
 	viper.AddConfigPath(configDir) // Check the OS-specific directory
 

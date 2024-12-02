@@ -12,20 +12,22 @@
     </button>
 
     <!-- List of channels (badges) -->
-    <span
-      v-for="(channelName, channelId) in whitelist"
-      :key="channelId"
-      class="inline-flex items-center gap-x-0.5 rounded-md bg-base px-2 py-1 text-xs font-medium text-white"
-    >
-      {{ channelName }}
-      <button
-        type="button"
-        class="group relative ml-1 -mr-1 h-4 w-4 rounded-sm hover:bg-gray-100/20 flex items-center justify-center text-white/30 hover:text-red-600"
-        @click="removeChannel(channelId)"
+    <div class="flex flex-wrap gap-2">
+      <div
+        v-for="(channelName, channelId) in whitelist"
+        :key="channelId"
+        class="inline-flex items-center gap-x-0.5 rounded-md bg-base px-2 py-1 text-xs font-medium text-white"
       >
-        <XMarkIcon class="h-3.5 w-3.5" />
-      </button>
-    </span>
+        {{ channelName }}
+        <button
+          type="button"
+          class="group relative ml-1 -mr-1 h-4 w-4 rounded-sm hover:bg-gray-100/20 flex items-center justify-center text-white/30 hover:text-red-600"
+          @click="removeChannel(channelId)"
+        >
+          <XMarkIcon class="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
 
     <!-- Modal -->
     <div
