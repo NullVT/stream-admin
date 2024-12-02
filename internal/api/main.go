@@ -72,6 +72,7 @@ func Start(msgChan chan livechat.Message, emc *livechat.EmoteCache) (*echo.Echo,
 	// Twitch routes
 	apiGroup.GET("/auth/twitch", handler.TwitchLogin)
 	apiGroup.POST("/auth/twitch", handler.TwitchCallback)
+	apiGroup.DELETE("/auth/twitch", handler.TwitchLogout)
 	apiGroup.GET("/auth/twitch/valid", handler.TwitchValidateAuth)
 	apiGroup.POST("/twitch/link-filtering", handler.TwitchLinkFiltering)
 	apiGroup.GET("/twitch/categories", handler.TwitchCategorySearch)

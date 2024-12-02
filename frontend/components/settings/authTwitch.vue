@@ -13,20 +13,31 @@
     </span>
   </button>
 
-  <button
-    v-else
-    class="w-full inline-flex justify-between items-center rounded-md px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-twitch hover:bg-twitch-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-10"
-    :disabled="twitchLoading || !!twitchStatus"
-    @click.once="login"
-  >
-    <img :src="twitchLogo" class="size-6" />
-    <span class="flex-grow text-center">{{
-      twitchStatus ? `Connected to Twitch` : "Login with Twitch"
-    }}</span>
-  </button>
+  <span v-else class="isolate inline-flex rounded-md shadow-sm w-full">
+    <button
+      class="w-full inline-flex justify-between items-center px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm bg-twitch hover:bg-twitch-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 h-10"
+      :class="twitchStatus ? 'rounded-l-md' : 'rounded-md'"
+      :disabled="twitchLoading || !!twitchStatus"
+      @click.once="login"
+    >
+      <img :src="twitchLogo" class="size-6" />
+      <span class="flex-grow text-center">{{
+        twitchStatus ? `Connected to Twitch` : "Login with Twitch"
+      }}</span>
+    </button>
+    <button
+      v-if="twitchStatus"
+      class="bg-primary rounded-r-md px-2"
+      title="logout"
+      @click="logout"
+    >
+      <ArrowLeftEndOnRectangleIcon class="h-5 w-5 text-white" />
+    </button>
+  </span>
 </template>
 
 <script lang="ts" setup>
+import { ArrowLeftEndOnRectangleIcon } from "@heroicons/vue/20/solid";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import twitchLogo from "../../assets/twitch.svg";
@@ -55,7 +66,6 @@ const getStatus = async () => {
 };
 onMounted(getStatus);
 
-// start oauth process
 const login = async () => {
   twitchLoading.value = true;
   const res = await fetch(`${settingsStore.adminServerAddr}/auth/twitch`);
@@ -68,6 +78,22 @@ const login = async () => {
 
   const body: { url: string } = await res.json();
   window.location.assign(body.url);
+};
+
+const logout = async () => {
+  twitchLoading.value = true;
+  const res = await fetch(`${settingsStore.adminServerAddr}/auth/twitch`, {
+    method: "DELETE",
+  });
+
+  if (res.status !== 204) {
+    console.error(`unexpected response code: ${res.status}`);
+    twitchLoading.value = false;
+    return;
+  }
+
+  twitchStatus.value = false;
+  twitchLoading.value = false;
 };
 
 // send oauth callback to API

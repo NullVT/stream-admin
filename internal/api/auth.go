@@ -92,3 +92,16 @@ func (h *Handler) TwitchValidateAuth(ctx echo.Context) error {
 	}
 	return ctx.JSON(200, map[string]bool{"isValid": isValid})
 }
+
+func (h *Handler) TwitchLogout(ctx echo.Context) error {
+	if err := secrets.Set("twitch_token", ""); err != nil {
+		log.Error().Err(err).Msg("Failed to persist token")
+		return echo.NewHTTPError(500, "Failed to persist token")
+	}
+	if err := secrets.Set("twitch_user", ""); err != nil {
+		log.Error().Err(err).Msg("Failed to persist UserInfo")
+		return echo.NewHTTPError(500, "Failed to persist UserInfo")
+	}
+
+	return ctx.JSON(204, nil)
+}
